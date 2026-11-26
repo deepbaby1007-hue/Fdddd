@@ -25,12 +25,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * 선상24 화면을 띄우고, 필요하면 자동 예약 엔진을 돌리는 화면.
- *
- *  - MODE_LOGIN : 사용자가 카카오 로그인을 직접 하는 화면 (로그인 쿠키가 앱에 저장됩니다)
- *  - MODE_RUN   : 자동 예약 엔진이 실제로 움직이는 화면 (진행 상황을 눈으로 볼 수 있습니다)
- */
 class BookingWebViewActivity : AppCompatActivity() {
 
     companion object {
@@ -38,10 +32,6 @@ class BookingWebViewActivity : AppCompatActivity() {
         const val MODE_LOGIN = "login"
         const val MODE_RUN = "run"
 
-        /**
-         * 카카오 로그인은 WebView 기본 UA(끝에 "wv" 가 붙음)를 거부하는 경우가 있어
-         * 일반 크롬 모바일 UA로 바꿔 둡니다.
-         */
         private const val MOBILE_UA =
             "Mozilla/5.0 (Linux; Android 14; SM-S911N) AppleWebKit/537.36 (KHTML, like Gecko) " +
                 "Chrome/131.0.0.0 Mobile Safari/537.36"
@@ -127,7 +117,6 @@ class BookingWebViewActivity : AppCompatActivity() {
             }
             val bookingEngine = BookingEngine(binding.webView, settings, engineListener)
             engine = bookingEngine
-            // 설정 화면의 '중지' 버튼으로도 멈출 수 있게 연결합니다.
             EngineBus.stopper = { reason ->
                 stopAndFinish(reason)
                 true
@@ -158,7 +147,6 @@ class BookingWebViewActivity : AppCompatActivity() {
         }
         webView.setBackgroundColor(Color.WHITE)
 
-        // 디버그 빌드에서는 PC 크롬의 chrome://inspect 로 화면 안 웹뷰를 들여다볼 수 있게 합니다.
         if ((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
@@ -172,7 +160,6 @@ class BookingWebViewActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 binding.progressBar.visibility = View.GONE
-                // 로그인 쿠키를 디스크에 저장해 앱을 껐다 켜도 유지되게 합니다.
                 CookieManager.getInstance().flush()
                 if (url != null) {
                     engine?.onPageFinished(url)
@@ -184,9 +171,24 @@ class BookingWebViewActivity : AppCompatActivity() {
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return false
-                val scheme = uri.scheme ?: return false
+                val scheme = uri.scheme?.lowercase(Locale.ROOT) ?: return false
                 if (scheme == "http" || scheme == "https") return false
-                // 카카오톡·은행 앱 등 외부 앱으로 넘기는 링크는 시스템에 맡깁니다.
+                if (scheme == "intent") {
+                    return try {
+                        val intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
+                        try {
+                            startActivity(intent)
+                        } catch (e: Exception) {
+                            val fallbackUrl = intent.getStringExtra("browser_fallback_url")
+                            if (!fallbackUrl.isNullOrBlank()) {
+                                view?.loadUrl(fallbackUrl)
+                            }
+                        }
+                        true
+                    } catch (e: Exception) {
+                        true
+                    }
+                }
                 return try {
                     startActivity(Intent(Intent.ACTION_VIEW, uri))
                     true
@@ -242,7 +244,6 @@ class BookingWebViewActivity : AppCompatActivity() {
                     if (auto) result.confirm() else result.cancel()
                     return true
                 }
-                // 엔진이 판단하지 않는 확인 창은 사람이 직접 고릅니다.
                 AlertDialog.Builder(this@BookingWebViewActivity)
                     .setMessage(message)
                     .setPositiveButton("예") { _, _ -> result.confirm() }
