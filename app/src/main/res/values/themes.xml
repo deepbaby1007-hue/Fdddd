@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Sunsang24Booking" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/brand_primary_light</item>
+        <item name="colorOnPrimaryContainer">@color/brand_dark</item>
+        <item name="android:statusBarColor">@color/brand_dark</item>
+        <item name="android:windowBackground">#F5F7FA</item>
+    </style>
+
+</resources>

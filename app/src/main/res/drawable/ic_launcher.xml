@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 배경 -->
+    <path
+        android:fillColor="#0B3C5D"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <!-- 돛 -->
+    <path
+        android:fillColor="#B9D7EA"
+        android:pathData="M54,22L54,60L32,60z" />
+    <path
+        android:fillColor="#7FD1FF"
+        android:pathData="M58,30L58,60L78,60z" />
+
+    <!-- 선체 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,64h68l-12,18h-44z" />
+
+    <!-- 물결 -->
+    <path
+        android:fillColor="#4E8FB5"
+        android:pathData="M14,88h80v4h-80z" />
+</vector>
